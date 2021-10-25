@@ -1,0 +1,10 @@
+C:\Users\cumminf3\source\repos\SerialTest\SerialTest\bin\Debug\SerialTest.exe.config
+C:\Users\cumminf3\source\repos\SerialTest\SerialTest\bin\Debug\SerialTest.exe
+C:\Users\cumminf3\source\repos\SerialTest\SerialTest\bin\Debug\SerialTest.pdb
+C:\Users\cumminf3\source\repos\SerialTest\SerialTest\obj\Debug\SerialTest.csproj.AssemblyReference.cache
+C:\Users\cumminf3\source\repos\SerialTest\SerialTest\obj\Debug\SerialTest.MainWindow.resources
+C:\Users\cumminf3\source\repos\SerialTest\SerialTest\obj\Debug\SerialTest.Properties.Resources.resources
+C:\Users\cumminf3\source\repos\SerialTest\SerialTest\obj\Debug\SerialTest.csproj.GenerateResource.cache
+C:\Users\cumminf3\source\repos\SerialTest\SerialTest\obj\Debug\SerialTest.csproj.CoreCompileInputs.cache
+C:\Users\cumminf3\source\repos\SerialTest\SerialTest\obj\Debug\SerialTest.exe
+C:\Users\cumminf3\source\repos\SerialTest\SerialTest\obj\Debug\SerialTest.pdb
