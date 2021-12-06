@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO.Ports;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using SerialTest.Panels;
 
 namespace SerialTest
 {
@@ -19,13 +13,6 @@ namespace SerialTest
         #region MEMBERS
 
         const int nChannels = 6;
-        const int nPoints = 1;
-        public List<ushort> channel1Data = new List<ushort>(nPoints);
-        public List<ushort> channel2Data = new List<ushort>(nPoints);
-        public List<ushort> channel3Data = new List<ushort>(nPoints);
-        public List<ushort> channel4Data = new List<ushort>(nPoints);
-        public List<ushort> channel5Data = new List<ushort>(nPoints);
-        public List<ushort> channel6Data = new List<ushort>(nPoints);
 
         #endregion
 
@@ -36,24 +23,6 @@ namespace SerialTest
         public MainWindow()
         {
             InitializeComponent();
-
-            // Loop over points
-            for (ushort i = 0; i < nPoints; i++)
-            {
-                channel1Data.Add(i);
-                channel2Data.Add(i);
-                channel3Data.Add(i);
-                channel4Data.Add(i);
-                channel5Data.Add(i);
-                channel6Data.Add(i);
-
-                chart.Series[0].Points.Add();
-                chart.Series[1].Points.Add();
-                chart.Series[2].Points.Add();
-                chart.Series[3].Points.Add();
-                chart.Series[4].Points.Add();
-                chart.Series[5].Points.Add();
-            }
         }
 
         #endregion
@@ -77,7 +46,25 @@ namespace SerialTest
 
         // ----------------------------------------------------------------------------------------------------------------------------- //
         byte[] buffer = new byte[10];
-        /// <summary>
+    
+
+        byte ComputeChecksum(byte[] packet)
+        {
+            sbyte checksum = 0;
+
+            unchecked
+            {
+                for (int i = 0; i < packet.Length - 1; i++)
+                {
+                    checksum += (sbyte)packet[i];
+                }
+            }
+            return (byte)(-checksum);
+        }
+
+        int downsample = 1;
+        long samplecount = 0;
+
         /// Event method to handle incoming serial data
         /// </summary>
         /// <param name="sender"></param>
@@ -86,55 +73,41 @@ namespace SerialTest
         {
             try
             {
+                // Read what is in the buffer
                 int nBytes = serialPort.Read(buffer, 0, buffer.Length);
 
-                if (nBytes == 10)
+                // If the packet is valid from a good checksum
+                if (ComputeChecksum(buffer) == buffer[9] && (samplecount % downsample == 0))
                 {
-                    foreach (byte item in buffer)
-                    {
-                        Console.Write(item);
-                    }
-                    Console.WriteLine("$$$");
+                    // Unpack the packets into channel data
+                    int[] values = Unpack8bitTo12bit(buffer, nChannels);
 
                     // Plot what is in the buffer
                     if (InvokeRequired)
                     {
-                        BeginInvoke(new MethodInvoker(() => PlotData(buffer)));
+                        BeginInvoke(new MethodInvoker(() => signalPlotter.PlotData(values)));
                     }
                     else
                     {
-                        PlotData(buffer);
+                        signalPlotter.PlotData(values);
                     }
                 }
+
+                // Flush what is in the buffer
+                serialPort.DiscardInBuffer();
+
+                // Increment samplecount
+                samplecount++;
+
             }
             catch (Exception ex)
             {
                 switch (ex.Message)
                 {
                     default:
-                        MessageBox.Show(ex.Message);
+                        Console.WriteLine(ex.Message);
                         break;
                 }
-            }
-        }
-
-        // ----------------------------------------------------------------------------------------------------------------------------- //
-
-        /// <summary>
-        /// Method to plot the data
-        /// </summary>
-        public void PlotData (byte[] data)
-        {
-            // Unpack the packets into channel data
-            int[] values = Unpack8bitTo12bit(data, nChannels);
-
-            if (values.Length == nChannels)
-            {
-                for (int i = 0; i < nChannels; i++)
-                {
-                    chart.Series[i].Points[0].YValues[0] = values[i];
-                }
-                chart.Refresh();
             }
         }
 
